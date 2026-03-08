@@ -488,8 +488,23 @@ function QBFieldView({
                   key={`recv-${r.id}`}
                   className={isOpen && canSelectReceiver ? "receiver-open" : ""}
                   filter={isSelected ? "url(#recvGlow)" : undefined}
-                  style={{ cursor: isInteractive ? "pointer" : "default" }}
-                  onClick={() => isInteractive && onReceiverSelect(r)}
+                  style={{
+                    cursor: isInteractive ? "pointer" : "default",
+                    pointerEvents: isInteractive ? "all" : "none",
+                  }}
+                  onClick={(e) => {
+                    if (isInteractive) {
+                      e.stopPropagation();
+                      onReceiverSelect(r);
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    if (isInteractive) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onReceiverSelect(r);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (isInteractive && (e.key === "Enter" || e.key === " ")) {
                       onReceiverSelect(r);
@@ -552,7 +567,13 @@ function QBFieldView({
                   )}
                   {/* Tap target (invisible, large hit area) */}
                   {isInteractive && (
-                    <circle cx={rx} cy={ry} r={dotR + 14} fill="transparent" />
+                    <circle
+                      cx={rx}
+                      cy={ry}
+                      r={dotR + 18}
+                      fill="rgba(0,0,0,0)"
+                      style={{ pointerEvents: "all" }}
+                    />
                   )}
                 </g>
               );
@@ -1240,10 +1261,10 @@ export default function PlayPage({
               key="pocket"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-1"
+              className="space-y-3"
             >
               <div
-                className="font-display font-black text-lg"
+                className="text-center font-display font-black text-lg"
                 style={{
                   color:
                     pressureFraction < 0.5
@@ -1259,13 +1280,47 @@ export default function PlayPage({
                     ? "PRESSURE COMING!"
                     : "THROW IT NOW!"}
               </div>
-              <div className="text-muted-foreground text-xs mt-0.5">
-                Tap a{" "}
-                {currentPlay?.type === "runLeft" ||
-                currentPlay?.type === "runRight"
-                  ? "gap"
-                  : "receiver"}{" "}
-                on the field
+              {/* Receiver / gap buttons for easy tapping */}
+              <div className="grid grid-cols-3 gap-2">
+                {currentPlay?.receivers.map((r) => {
+                  const isRun =
+                    currentPlay.type === "runLeft" ||
+                    currentPlay.type === "runRight";
+                  const coverageColor =
+                    r.coverage === "open"
+                      ? "oklch(72% 0.22 142)"
+                      : r.coverage === "contested"
+                        ? "oklch(78% 0.20 85)"
+                        : "oklch(60% 0.28 25)";
+                  return (
+                    <button
+                      key={r.id}
+                      data-ocid={`play.receiver.${r.id}.button`}
+                      type="button"
+                      onClick={() => handleReceiverSelect(r)}
+                      className="rounded-xl border-2 py-3 px-2 flex flex-col items-center gap-1 font-display font-black text-sm active:scale-95 transition-transform bg-secondary/60 hover:bg-secondary"
+                      style={{ borderColor: coverageColor }}
+                    >
+                      <span
+                        className="text-xl font-black"
+                        style={{ color: coverageColor }}
+                      >
+                        {r.label}
+                      </span>
+                      <span className="text-xs font-bold text-muted-foreground">
+                        {r.position}
+                      </span>
+                      {!isRun && (
+                        <span
+                          className="text-[10px] font-black uppercase"
+                          style={{ color: coverageColor }}
+                        >
+                          {r.coverage}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
           ) : phase === "throwing" ? (
