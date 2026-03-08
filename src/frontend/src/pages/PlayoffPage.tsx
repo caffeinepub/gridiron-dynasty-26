@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Swords, Trophy } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { TEAM_LOGOS } from "../assets";
 import { AI_TEAMS } from "../gameLogic";
 import type { PlayoffMatchup, PlayoffState, Team } from "../types";
 
@@ -76,6 +77,13 @@ function MatchupBox({
           {matchup.teamAId === userTeam.id && (
             <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
           )}
+          {teamA?.logoId && TEAM_LOGOS[teamA.logoId] && (
+            <img
+              src={TEAM_LOGOS[teamA.logoId]}
+              alt={teamA.abbreviation}
+              className="w-5 h-5 object-contain"
+            />
+          )}
           <span
             className="font-display font-black text-sm"
             style={{
@@ -117,6 +125,13 @@ function MatchupBox({
         <div className="flex items-center gap-2">
           {matchup.teamBId === userTeam.id && (
             <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+          )}
+          {teamB?.logoId && TEAM_LOGOS[teamB.logoId] && (
+            <img
+              src={TEAM_LOGOS[teamB.logoId]}
+              alt={teamB.abbreviation}
+              className="w-5 h-5 object-contain"
+            />
           )}
           <span
             className="font-display font-black text-sm"
@@ -249,6 +264,13 @@ export default function PlayoffPage({
             data-ocid="playoffs.success_state"
           >
             <div className="text-5xl mb-3">🏆</div>
+            {championTeam.logoId && TEAM_LOGOS[championTeam.logoId] && (
+              <img
+                src={TEAM_LOGOS[championTeam.logoId]}
+                alt={championTeam.name}
+                className="w-16 h-16 object-contain mx-auto mb-3 drop-shadow-lg"
+              />
+            )}
             <div className="font-display text-2xl font-black text-yellow-400 mb-1">
               {isUserChampion ? "YOU'RE CHAMPION!" : "CHAMPION"}
             </div>

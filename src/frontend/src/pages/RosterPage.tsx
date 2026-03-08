@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Coins, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import { PLAYER_PORTRAITS } from "../assets";
 import { getUpgradeCost } from "../gameLogic";
 import type { Player } from "../types";
 
@@ -90,7 +91,10 @@ export default function RosterPage({
 
       {/* Column headers */}
       <div className="flex items-center px-3 py-1.5 mb-1">
-        <div className="w-12 text-xs text-muted-foreground font-medium">
+        <div className="w-14 text-xs text-muted-foreground font-medium">
+          PLAYER
+        </div>
+        <div className="w-10 text-xs text-muted-foreground font-medium ml-1">
           POS
         </div>
         <div className="flex-1 text-xs text-muted-foreground font-medium">
@@ -105,7 +109,7 @@ export default function RosterPage({
         <div className="w-10 text-center text-xs text-muted-foreground font-medium">
           STR
         </div>
-        <div className="w-10 text-center text-xs text-muted-foreground font-medium">
+        <div className="w-10 text-center text-xs text-muted-foreground font-medium hidden sm:block">
           AWR
         </div>
         <div className="w-20 text-center text-xs text-muted-foreground font-medium">
@@ -118,14 +122,27 @@ export default function RosterPage({
           const dataOcid = index < 3 ? `roster.item.${index + 1}` : undefined;
           const upgradeCost = getUpgradeCost(player.overall);
           const canUpgrade = coins >= upgradeCost && player.overall < 99;
+          const portraitSrc =
+            PLAYER_PORTRAITS[player.position] ?? PLAYER_PORTRAITS.QB;
           return (
             <Card
               key={player.id}
               data-ocid={dataOcid}
               className="bg-card border-border/30 hover:border-border/60 transition-colors"
             >
-              <CardContent className="flex items-center px-3 py-2.5 gap-0">
-                <div className="w-12">
+              <CardContent className="flex items-center px-3 py-2 gap-0">
+                {/* Portrait */}
+                <div className="w-14 shrink-0 pr-2">
+                  <div className="w-10 h-[52px] rounded-lg overflow-hidden border border-border/30 bg-secondary/30">
+                    <img
+                      src={portraitSrc}
+                      alt={player.position}
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                </div>
+                {/* Position badge */}
+                <div className="w-10 shrink-0">
                   <Badge
                     className={`text-xs font-bold px-1.5 py-0.5 ${getPositionBadgeClass(player.position)}`}
                   >
@@ -148,7 +165,7 @@ export default function RosterPage({
                 <div className="w-10 text-center text-sm text-foreground/70">
                   {player.strength}
                 </div>
-                <div className="w-10 text-center text-sm text-foreground/70">
+                <div className="w-10 text-center text-sm text-foreground/70 hidden sm:block">
                   {player.awareness}
                 </div>
                 <div className="w-20 flex flex-col items-center gap-0.5">

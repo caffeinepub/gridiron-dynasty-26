@@ -19,6 +19,10 @@ export type Team = {
   wins: number;
   losses: number;
   isUserTeam: boolean;
+  jerseyStyle?: "home" | "away" | "alternate";
+  helmetStyle?: "classic" | "matte" | "chrome";
+  stadiumStyle?: "dome" | "outdoor" | "coastal";
+  logoId?: number; // 1–16, maps to AI team logos
 };
 
 export type ScheduledGame = {
@@ -51,6 +55,17 @@ export type DriveState = {
   opponentTeamId: number;
   playHistory: string[];
   isGameOver: boolean;
+};
+
+export type ReceiverRoute = {
+  id: string;
+  label: string;
+  position: string;
+  x: number;
+  depth: number;
+  coverage: "open" | "contested" | "covered";
+  coverageDifficulty: number;
+  routeType: "short" | "deep" | "run";
 };
 
 export type PackTier = "bronze" | "silver" | "gold";

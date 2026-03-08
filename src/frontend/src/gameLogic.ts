@@ -37,6 +37,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 1,
+    jerseyStyle: "home",
+    stadiumStyle: "dome",
+    helmetStyle: "classic",
   },
   {
     id: 2,
@@ -48,6 +52,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 2,
+    jerseyStyle: "away",
+    stadiumStyle: "outdoor",
+    helmetStyle: "matte",
   },
   {
     id: 3,
@@ -59,6 +67,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 3,
+    jerseyStyle: "alternate",
+    stadiumStyle: "coastal",
+    helmetStyle: "chrome",
   },
   {
     id: 4,
@@ -70,6 +82,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 4,
+    jerseyStyle: "home",
+    stadiumStyle: "dome",
+    helmetStyle: "classic",
   },
   {
     id: 5,
@@ -81,6 +97,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 5,
+    jerseyStyle: "away",
+    stadiumStyle: "outdoor",
+    helmetStyle: "matte",
   },
   {
     id: 6,
@@ -92,6 +112,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 6,
+    jerseyStyle: "alternate",
+    stadiumStyle: "coastal",
+    helmetStyle: "chrome",
   },
   {
     id: 7,
@@ -103,6 +127,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 7,
+    jerseyStyle: "home",
+    stadiumStyle: "dome",
+    helmetStyle: "classic",
   },
   {
     id: 8,
@@ -114,6 +142,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 8,
+    jerseyStyle: "away",
+    stadiumStyle: "outdoor",
+    helmetStyle: "matte",
   },
   {
     id: 9,
@@ -125,6 +157,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 9,
+    jerseyStyle: "alternate",
+    stadiumStyle: "coastal",
+    helmetStyle: "chrome",
   },
   {
     id: 10,
@@ -136,6 +172,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 10,
+    jerseyStyle: "home",
+    stadiumStyle: "dome",
+    helmetStyle: "classic",
   },
   {
     id: 11,
@@ -147,6 +187,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 11,
+    jerseyStyle: "away",
+    stadiumStyle: "outdoor",
+    helmetStyle: "matte",
   },
   {
     id: 12,
@@ -158,6 +202,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 12,
+    jerseyStyle: "alternate",
+    stadiumStyle: "coastal",
+    helmetStyle: "chrome",
   },
   {
     id: 13,
@@ -169,6 +217,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 13,
+    jerseyStyle: "home",
+    stadiumStyle: "dome",
+    helmetStyle: "classic",
   },
   {
     id: 14,
@@ -180,6 +232,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 14,
+    jerseyStyle: "away",
+    stadiumStyle: "outdoor",
+    helmetStyle: "matte",
   },
   {
     id: 15,
@@ -191,6 +247,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 15,
+    jerseyStyle: "alternate",
+    stadiumStyle: "coastal",
+    helmetStyle: "chrome",
   },
   {
     id: 16,
@@ -202,6 +262,10 @@ export const AI_TEAMS: Team[] = [
     wins: 0,
     losses: 0,
     isUserTeam: false,
+    logoId: 16,
+    jerseyStyle: "home",
+    stadiumStyle: "dome",
+    helmetStyle: "classic",
   },
 ];
 
@@ -358,6 +422,299 @@ export function generateRoster(teamId: number): Player[] {
   }
 
   return players;
+}
+
+// ─── QB Perspective: Receiver & Throw Logic ──────────────────────────────────
+
+export type ReceiverRoute = {
+  id: string;
+  label: string; // "WR1", "RB", "TE", etc.
+  position: string; // Field position label
+  // Perspective field coords: x = -1 (far left) to 1 (far right), depth = 0 (LOS) to 1 (deep)
+  x: number;
+  depth: number;
+  coverage: "open" | "contested" | "covered";
+  // 0=wide open, 1=covered tight
+  coverageDifficulty: number;
+  routeType: "short" | "deep" | "run";
+};
+
+export type PlayCallOption = {
+  type: "runLeft" | "runRight" | "passShort" | "passDeep";
+  label: string;
+  shortLabel: string;
+  icon: string;
+  receivers: ReceiverRoute[];
+};
+
+function genCoverage(): {
+  coverage: "open" | "contested" | "covered";
+  difficulty: number;
+} {
+  const r = randFloat();
+  if (r < 0.35) return { coverage: "open", difficulty: randRange(0, 25) / 100 };
+  if (r < 0.7)
+    return { coverage: "contested", difficulty: randRange(30, 60) / 100 };
+  return { coverage: "covered", difficulty: randRange(65, 95) / 100 };
+}
+
+export function generatePlayOptions(): PlayCallOption[] {
+  const c1 = genCoverage();
+  const c2 = genCoverage();
+  const c3 = genCoverage();
+  const c4 = genCoverage();
+  const c5 = genCoverage();
+  const c6 = genCoverage();
+
+  return [
+    {
+      type: "passShort",
+      label: "Slant Right",
+      shortLabel: "SLANT",
+      icon: "🎯",
+      receivers: [
+        {
+          id: "wr1",
+          label: "WR",
+          position: "Slot",
+          x: -0.55,
+          depth: 0.28,
+          coverage: c1.coverage,
+          coverageDifficulty: c1.difficulty,
+          routeType: "short",
+        },
+        {
+          id: "te1",
+          label: "TE",
+          position: "Seam",
+          x: 0.15,
+          depth: 0.35,
+          coverage: c2.coverage,
+          coverageDifficulty: c2.difficulty,
+          routeType: "short",
+        },
+        {
+          id: "rb1",
+          label: "RB",
+          position: "Flat",
+          x: 0.7,
+          depth: 0.12,
+          coverage: c3.coverage,
+          coverageDifficulty: c3.difficulty,
+          routeType: "short",
+        },
+      ],
+    },
+    {
+      type: "passDeep",
+      label: "Vertical Go",
+      shortLabel: "GO",
+      icon: "🚀",
+      receivers: [
+        {
+          id: "wr1",
+          label: "WR1",
+          position: "Post",
+          x: -0.45,
+          depth: 0.72,
+          coverage: c4.coverage,
+          coverageDifficulty: c4.difficulty,
+          routeType: "deep",
+        },
+        {
+          id: "wr2",
+          label: "WR2",
+          position: "Corner",
+          x: 0.6,
+          depth: 0.65,
+          coverage: c5.coverage,
+          coverageDifficulty: c5.difficulty,
+          routeType: "deep",
+        },
+        {
+          id: "te1",
+          label: "TE",
+          position: "Cross",
+          x: 0.1,
+          depth: 0.55,
+          coverage: c6.coverage,
+          coverageDifficulty: c6.difficulty,
+          routeType: "deep",
+        },
+      ],
+    },
+    {
+      type: "runLeft",
+      label: "Outside Zone Left",
+      shortLabel: "RUN L",
+      icon: "⬅️",
+      receivers: [
+        {
+          id: "gap_left",
+          label: "B",
+          position: "Left Gap",
+          x: -0.3,
+          depth: 0.18,
+          coverage: c1.coverage,
+          coverageDifficulty: c1.difficulty,
+          routeType: "run",
+        },
+        {
+          id: "gap_wide_left",
+          label: "C",
+          position: "Wide Left",
+          x: -0.65,
+          depth: 0.22,
+          coverage: c2.coverage,
+          coverageDifficulty: c2.difficulty,
+          routeType: "run",
+        },
+      ],
+    },
+    {
+      type: "runRight",
+      label: "Outside Zone Right",
+      shortLabel: "RUN R",
+      icon: "➡️",
+      receivers: [
+        {
+          id: "gap_right",
+          label: "B",
+          position: "Right Gap",
+          x: 0.3,
+          depth: 0.18,
+          coverage: c4.coverage,
+          coverageDifficulty: c4.difficulty,
+          routeType: "run",
+        },
+        {
+          id: "gap_wide_right",
+          label: "C",
+          position: "Wide Right",
+          x: 0.65,
+          depth: 0.22,
+          coverage: c5.coverage,
+          coverageDifficulty: c5.difficulty,
+          routeType: "run",
+        },
+      ],
+    },
+  ];
+}
+
+export function throwToReceiver(
+  receiver: ReceiverRoute,
+  pressureUsed: number, // 0 to 1, fraction of pocket time elapsed
+): PlayResult {
+  const roll = randFloat();
+  const isRun = receiver.routeType === "run";
+  const pressurePenalty =
+    pressureUsed > 0.85 ? 0.3 : pressureUsed > 0.65 ? 0.12 : 0;
+  const effectiveDifficulty = Math.min(
+    1,
+    receiver.coverageDifficulty + pressurePenalty,
+  );
+
+  if (isRun) {
+    // Run play based on gap difficulty
+    if (roll < 0.05 + effectiveDifficulty * 0.08) {
+      return {
+        yardsGained: -randRange(1, 3),
+        isTouchdown: false,
+        isInterception: false,
+        isFumble: effectiveDifficulty > 0.5 && roll < 0.03,
+        description:
+          effectiveDifficulty > 0.5 && roll < 0.03
+            ? "FUMBLE! Stripped at the line!"
+            : "Stuffed for a loss! Defense read the play.",
+      };
+    }
+    if (roll < 0.25) {
+      const g = randRange(1, 4);
+      return {
+        yardsGained: g,
+        isTouchdown: false,
+        isInterception: false,
+        isFumble: false,
+        description: `Run for ${g} yards. Tight run through the gap.`,
+      };
+    }
+    if (roll < 0.65) {
+      const g = randRange(4, 8);
+      return {
+        yardsGained: g,
+        isTouchdown: false,
+        isInterception: false,
+        isFumble: false,
+        description: `${g}-yard run! Hit the hole hard!`,
+      };
+    }
+    if (roll < 0.88) {
+      const g = randRange(8, 15);
+      return {
+        yardsGained: g,
+        isTouchdown: false,
+        isInterception: false,
+        isFumble: false,
+        description: `Big gain! ${g} yards on the ground!`,
+      };
+    }
+    const g = randRange(15, 30);
+    return {
+      yardsGained: g,
+      isTouchdown: false,
+      isInterception: false,
+      isFumble: false,
+      description: `BREAKAWAY! ${g} yards! Could go all the way!`,
+    };
+  }
+
+  // Pass play
+  const interceptChance =
+    effectiveDifficulty * 0.14 + (pressureUsed > 0.85 ? 0.12 : 0);
+  if (roll < interceptChance) {
+    return {
+      yardsGained: 0,
+      isTouchdown: false,
+      isInterception: true,
+      isFumble: false,
+      description:
+        pressureUsed > 0.85
+          ? "INTERCEPTION! Forced throw under pressure!"
+          : "INTERCEPTION! Read by the defense!",
+    };
+  }
+  const incompleteChance =
+    effectiveDifficulty * 0.45 + (pressureUsed > 0.85 ? 0.2 : 0);
+  if (roll < interceptChance + incompleteChance) {
+    return {
+      yardsGained: 0,
+      isTouchdown: false,
+      isInterception: false,
+      isFumble: false,
+      description:
+        receiver.coverage === "covered"
+          ? "Pass broken up! Defender batted it away."
+          : "Incomplete. Throw slightly off target.",
+    };
+  }
+
+  const isDeep = receiver.routeType === "deep";
+  const gain = isDeep ? randRange(15, 38) : randRange(4, 16);
+  const isFirstDown = gain >= 10;
+  return {
+    yardsGained: gain,
+    isTouchdown: false,
+    isInterception: false,
+    isFumble: false,
+    description: isDeep
+      ? gain > 28
+        ? `BOMB CONNECTED! ${gain} yards downfield!`
+        : `Deep completion! ${gain} yards!`
+      : isFirstDown
+        ? `Completion for ${gain} yards! First down!`
+        : `Short gain, ${gain} yards.`,
+  };
 }
 
 export function callPlay(

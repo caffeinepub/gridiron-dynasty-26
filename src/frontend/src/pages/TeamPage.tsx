@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Edit2, Shield, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { JERSEY_IMAGES, TEAM_LOGOS } from "../assets";
 import type { Player, Team } from "../types";
 
 interface TeamPageProps {
@@ -68,6 +69,9 @@ export default function TeamPage({
     setEditOpen(false);
   }
 
+  const teamLogoSrc = userTeam.logoId ? TEAM_LOGOS[userTeam.logoId] : null;
+  const jerseyImgSrc = JERSEY_IMAGES[userTeam.jerseyStyle ?? "home"];
+
   return (
     <div className="p-4 space-y-4 pb-24 max-w-xl mx-auto">
       {/* Team Card */}
@@ -85,24 +89,107 @@ export default function TeamPage({
           }}
         />
         <div className="relative flex items-start justify-between">
-          <div>
-            <p className="text-white/60 text-xs uppercase tracking-widest">
-              {userTeam.city}
-            </p>
-            <h1 className="font-display text-4xl font-black text-white leading-tight mt-0.5">
-              {userTeam.name}
-            </h1>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">
-                {userTeam.wins}W – {userTeam.losses}L
-              </span>
+          <div className="flex items-start gap-4">
+            {/* Team logo */}
+            {teamLogoSrc ? (
+              <img
+                src={teamLogoSrc}
+                alt={userTeam.name}
+                className="w-16 h-16 object-contain drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] shrink-0 mt-1"
+              />
+            ) : (
+              <div className="w-16 h-16 flex items-center justify-center text-4xl shrink-0">
+                🏈
+              </div>
+            )}
+            <div>
+              <p className="text-white/60 text-xs uppercase tracking-widest">
+                {userTeam.city}
+              </p>
+              <h1 className="font-display text-3xl font-black text-white leading-tight mt-0.5">
+                {userTeam.name}
+              </h1>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">
+                  {userTeam.wins}W – {userTeam.losses}L
+                </span>
+              </div>
             </div>
           </div>
-          <div className="font-display text-6xl font-black text-white/30 leading-none select-none">
+          <div className="font-display text-5xl font-black text-white/25 leading-none select-none">
             {userTeam.abbreviation}
           </div>
         </div>
       </div>
+
+      {/* Jersey + Colors Section */}
+      <Card className="bg-card border-border/50">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            {/* Jersey image */}
+            <div className="w-24 shrink-0 flex items-center justify-center">
+              <img
+                src={jerseyImgSrc}
+                alt={`${userTeam.jerseyStyle ?? "home"} jersey`}
+                className="h-28 w-auto object-contain"
+                style={{
+                  filter: `drop-shadow(0 4px 12px ${userTeam.primaryColor}60)`,
+                }}
+              />
+            </div>
+            <div className="flex-1 space-y-3">
+              <div>
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                  Uniform
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="text-xs capitalize bg-secondary/50 text-foreground/70 border-border/30">
+                    {userTeam.jerseyStyle ?? "home"} jersey
+                  </Badge>
+                  <Badge className="text-xs capitalize bg-secondary/50 text-foreground/70 border-border/30">
+                    {userTeam.helmetStyle ?? "classic"} helmet
+                  </Badge>
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                  Team Colors
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-8 h-8 rounded-lg border-2 border-border/40 shadow-inner"
+                      style={{ background: userTeam.primaryColor }}
+                    />
+                    <span className="text-xs font-mono text-muted-foreground">
+                      {userTeam.primaryColor}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-8 h-8 rounded-lg border-2 border-border/40 shadow-inner"
+                      style={{ background: userTeam.secondaryColor }}
+                    />
+                    <span className="text-xs font-mono text-muted-foreground">
+                      {userTeam.secondaryColor}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {userTeam.stadiumStyle && (
+                <div>
+                  <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                    Stadium
+                  </div>
+                  <Badge className="text-xs capitalize bg-secondary/50 text-foreground/70 border-border/30">
+                    🏟️ {userTeam.stadiumStyle} stadium
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 gap-3">

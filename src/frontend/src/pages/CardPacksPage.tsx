@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Coins, Package, Sparkles, Star, X, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { PLAYER_PORTRAITS } from "../assets";
 import { openCardPack } from "../gameLogic";
 import type { CardRarity, PackTier, PlayerCard } from "../types";
 
@@ -111,19 +112,22 @@ function PlayerCardDisplay({
   index: number;
 }) {
   const rarityStyle = getRarityStyle(card.rarity);
+  const portraitSrc = PLAYER_PORTRAITS[card.position] ?? PLAYER_PORTRAITS.QB;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.8 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 30, scale: 0.8, rotateY: -15 }}
+      animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
       transition={{
         delay: index * 0.15,
         type: "spring",
         stiffness: 200,
         damping: 20,
       }}
-      className={`relative rounded-xl border-2 ${rarityStyle.border} ${rarityStyle.bg} p-3 text-center shadow-lg ${rarityStyle.glow}`}
+      className={`relative rounded-xl border-2 ${rarityStyle.border} overflow-hidden shadow-xl ${rarityStyle.glow} flex flex-col`}
+      style={{ minHeight: "200px" }}
     >
+      {/* Elite rotating star */}
       {card.rarity === "Elite" && (
         <motion.div
           animate={{ rotate: 360 }}
@@ -132,56 +136,90 @@ function PlayerCardDisplay({
             repeat: Number.POSITIVE_INFINITY,
             ease: "linear",
           }}
-          className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center"
+          className="absolute top-1.5 right-1.5 w-5 h-5 flex items-center justify-center z-20"
         >
-          <Sparkles className="w-4 h-4 text-yellow-400" />
+          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
         </motion.div>
       )}
-      {/* Rarity badge */}
-      <Badge
-        className={`text-xs font-bold mb-2 ${rarityStyle.bg} ${rarityStyle.text} border ${rarityStyle.border}`}
-      >
-        {card.rarity}
-      </Badge>
 
-      {/* Position */}
-      <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-background/60 border border-border/40 mb-2">
-        <span className="text-xs font-black text-foreground/80">
-          {card.position}
-        </span>
-      </div>
-
-      {/* Overall */}
-      <div
-        className={`font-display text-4xl font-black leading-none mb-1 ${getOvrColor(card.overall)}`}
-      >
-        {card.overall}
-      </div>
-      <div className="text-xs text-muted-foreground mb-2">OVR</div>
-
-      {/* Name */}
-      <div className="font-display font-bold text-sm text-foreground leading-tight truncate">
-        {card.name}
-      </div>
-
-      {/* Stats row */}
-      <div className="flex justify-around mt-2 pt-2 border-t border-border/20">
-        <div className="text-center">
-          <div className="text-xs text-muted-foreground">SPD</div>
-          <div className="text-sm font-bold text-foreground/80">
-            {card.speed}
+      {/* Portrait — top 60% of card */}
+      <div className="relative flex-none" style={{ height: "120px" }}>
+        <img
+          src={portraitSrc}
+          alt={card.position}
+          className="w-full h-full object-cover object-top"
+        />
+        {/* Rarity gradient overlay at top */}
+        <div
+          className={`absolute inset-0 opacity-30 ${rarityStyle.bg}`}
+          style={{
+            background:
+              card.rarity === "Elite"
+                ? "linear-gradient(to bottom, rgba(234,179,8,0.4), transparent)"
+                : card.rarity === "Rare"
+                  ? "linear-gradient(to bottom, rgba(59,130,246,0.3), transparent)"
+                  : "linear-gradient(to bottom, rgba(100,116,139,0.2), transparent)",
+          }}
+        />
+        {/* OVR chip */}
+        <div className="absolute top-2 left-2 z-10">
+          <div
+            className={`font-display text-xl font-black leading-none ${getOvrColor(card.overall)} drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]`}
+          >
+            {card.overall}
+          </div>
+          <div className="text-[9px] font-bold text-white/60 leading-none">
+            OVR
           </div>
         </div>
-        <div className="text-center">
-          <div className="text-xs text-muted-foreground">STR</div>
-          <div className="text-sm font-bold text-foreground/80">
-            {card.strength}
+        {/* Position chip */}
+        <div className="absolute bottom-2 right-2 z-10">
+          <div className="bg-background/80 backdrop-blur-sm border border-border/40 rounded px-1.5 py-0.5 text-[9px] font-black text-foreground/90">
+            {card.position}
           </div>
         </div>
-        <div className="text-center">
-          <div className="text-xs text-muted-foreground">AWR</div>
-          <div className="text-sm font-bold text-foreground/80">
-            {card.awareness}
+      </div>
+
+      {/* Card bottom — stats area */}
+      <div className={`flex-1 ${rarityStyle.bg} p-2`}>
+        {/* Rarity badge */}
+        <div className="flex items-center justify-between mb-1.5">
+          <Badge
+            className={`text-[9px] font-bold py-0 px-1.5 h-4 ${rarityStyle.bg} ${rarityStyle.text} border ${rarityStyle.border}`}
+          >
+            {card.rarity.toUpperCase()}
+          </Badge>
+        </div>
+        {/* Name */}
+        <div className="font-display font-black text-xs text-foreground leading-tight truncate mb-2">
+          {card.name}
+        </div>
+
+        {/* Stats row */}
+        <div className="flex justify-between pt-1.5 border-t border-border/20">
+          <div className="text-center">
+            <div className="text-[8px] text-muted-foreground font-medium">
+              SPD
+            </div>
+            <div className="text-xs font-black text-foreground/90">
+              {card.speed}
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-[8px] text-muted-foreground font-medium">
+              STR
+            </div>
+            <div className="text-xs font-black text-foreground/90">
+              {card.strength}
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-[8px] text-muted-foreground font-medium">
+              AWR
+            </div>
+            <div className="text-xs font-black text-foreground/90">
+              {card.awareness}
+            </div>
           </div>
         </div>
       </div>

@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Coins, RotateCcw, Trophy } from "lucide-react";
 import { useState } from "react";
+import { TEAM_LOGOS } from "../assets";
 import { AI_TEAMS } from "../gameLogic";
 import type { PlayoffState, ScheduledGame, Team } from "../types";
 
@@ -43,13 +44,13 @@ export default function SeasonPage({
   // Calculate records from schedule for user team
   const userRecord = { wins: userTeam.wins, losses: userTeam.losses };
 
-  // Give AI teams some simulated records (based on their seed)
+  // Give AI teams some simulated records (based on their seed), out of 17 games
   const aiRecords = AI_TEAMS.map((team) => {
-    const base = (team.id * 3) % 9;
+    const base = (team.id * 3) % 17;
     return {
       id: team.id,
       wins: base,
-      losses: 8 - base,
+      losses: 17 - base,
     };
   });
 
@@ -196,12 +197,26 @@ export default function SeasonPage({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
+                        {userTeam.logoId && TEAM_LOGOS[userTeam.logoId] && (
+                          <img
+                            src={TEAM_LOGOS[userTeam.logoId]}
+                            alt={userTeam.abbreviation}
+                            className="w-5 h-5 object-contain shrink-0"
+                          />
+                        )}
                         <span className="font-display font-bold text-sm text-primary">
                           {userTeam.abbreviation}
                         </span>
                         <span className="text-muted-foreground text-xs">
                           {isHome ? "vs" : "@"}
                         </span>
+                        {opponent?.logoId && TEAM_LOGOS[opponent.logoId] && (
+                          <img
+                            src={TEAM_LOGOS[opponent.logoId]}
+                            alt={opponent.abbreviation}
+                            className="w-5 h-5 object-contain shrink-0"
+                          />
+                        )}
                         <span
                           className="font-display font-bold text-sm"
                           style={{ color: opponent?.primaryColor ?? "#888" }}
@@ -269,6 +284,13 @@ export default function SeasonPage({
                       <div className="flex items-center gap-2">
                         {isUser && (
                           <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                        )}
+                        {team.logoId && TEAM_LOGOS[team.logoId] && (
+                          <img
+                            src={TEAM_LOGOS[team.logoId]}
+                            alt={team.abbreviation}
+                            className="w-5 h-5 object-contain shrink-0"
+                          />
                         )}
                         <span
                           className={`font-display font-bold text-sm ${isUser ? "text-primary" : "text-foreground"}`}

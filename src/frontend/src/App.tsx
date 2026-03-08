@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { TEAM_LOGOS } from "./assets";
 import {
   AI_TEAMS,
   generatePlayoffBracket,
@@ -100,8 +101,11 @@ function saveState(state: GameState) {
 }
 
 function createSchedule(userTeamId: number): ScheduledGame[] {
-  const shuffled = [...AI_TEAMS].sort(() => Math.random() - 0.5).slice(0, 8);
-  return shuffled.map((opp, idx) => ({
+  // Use all 16 AI teams for weeks 1-16, then add a random rematch for week 17
+  const shuffled = [...AI_TEAMS].sort(() => Math.random() - 0.5);
+  const week17Opp = shuffled[Math.floor(Math.random() * shuffled.length)];
+  const allOpponents = [...shuffled, week17Opp];
+  return allOpponents.map((opp, idx) => ({
     id: idx + 1,
     homeTeamId: idx % 2 === 0 ? userTeamId : opp.id,
     awayTeamId: idx % 2 === 0 ? opp.id : userTeamId,
@@ -451,9 +455,17 @@ export default function App() {
     <div className="min-h-screen bg-background flex flex-col max-w-2xl mx-auto relative">
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border/30">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🏈</span>
+            {userTeam.logoId && TEAM_LOGOS[userTeam.logoId] ? (
+              <img
+                src={TEAM_LOGOS[userTeam.logoId]}
+                alt={userTeam.abbreviation}
+                className="w-7 h-7 object-contain"
+              />
+            ) : (
+              <span className="text-lg">🏈</span>
+            )}
             <span className="font-display font-black text-primary text-lg tracking-tight">
               GRIDIRON
             </span>

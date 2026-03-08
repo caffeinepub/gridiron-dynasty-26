@@ -1,37 +1,34 @@
 # Gridiron Dynasty 26
 
 ## Current State
-- Full-stack football game with team creation, roster management, play-calling gameplay, and 8-game season mode
-- Data stored in localStorage via `GameState` type
-- Nav: Home, Team, Roster, Season, Play (5 tabs)
-- No card packs, no player upgrades, no playoff bracket
+The game has a top-down SVG football field with colored dots representing players, route lines, and a ball animation. Play-calling uses 4 buttons (Run Left, Run Right, Pass Short, Pass Deep). Results are text-based with dice-roll outcomes. There is no sense of being the quarterback.
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Card Packs system**: Players earn coins from wins (e.g. 50 coins/win, 25 coins/loss). Three pack tiers: Bronze (100 coins), Silver (300 coins), Gold (600 coins). Each pack reveals 3–5 player cards with randomized position, overall rating, and rarity (Common, Rare, Elite). Pulled players go to the user's roster. Animated "open pack" reveal sequence with card flip animation.
-- **Player Upgrades**: On the Roster page (or a new Upgrades tab within it), each player can spend coins to upgrade their Overall rating. Upgrade costs scale with current overall (e.g. 75→76 costs 50 coins, 85→86 costs 150 coins, 90+ costs 300 coins). Max overall: 99.
-- **Playoff Bracket**: After all 8 regular season games are complete, a "Playoffs" option unlocks. The top 4 teams (user + 3 best AI teams by simulated record) enter a 4-team single-elimination bracket (Semis → Championship). Each round can be played live or simulated. Bracket is displayed as a visual tree with matchup results filled in as rounds complete.
-- New `coins` field in GameState (starts at 200)
-- New `playerCards` collected array in GameState
-- New `playoffState` in GameState
-- Nav tab "Packs" (package icon) and "Playoffs" (trophy icon)
+- First-person QB perspective view: a 3D-perspective canvas showing the field stretching away from the player's POV behind center
+- Receivers visible as player silhouettes on the field with their position label and coverage indicators
+- A "pocket" phase after snap: a countdown pressure meter as the pass rush closes in (3 seconds to throw)
+- Tap-to-throw mechanic: user taps a specific receiver to target them — each receiver has a coverage difficulty rating
+- Coverage indicators: each receiver shows open/contested/covered status visually
+- Pass result based on coverage difficulty + pressure (did you throw in time?) + receiver rating
+- Running plays: show a burst animation with left/right lane choice instead of receivers
+- Pre-snap: show play art overlaid on perspective field with highlighted routes before snapping
 
 ### Modify
-- `types.ts`: Add `PlayerCard`, `PackTier`, `PlayoffMatchup`, `PlayoffState`, and extend `GameState` with `coins`, `collectedCards`, `playoffState`
-- `gameLogic.ts`: Add `openCardPack()`, `getUpgradeCost()`, `generatePlayoffBracket()`, `simulatePlayoffGame()` functions
-- `App.tsx`: Add `packs` and `playoffs` pages, wire coin earning on game save, handle playoff state updates, add nav items
-- `SeasonPage.tsx`: Show coin balance, add "Enter Playoffs" button when all 8 games are played
+- PlayPage.tsx: replace or supplement the existing top-down SVG field with a new first-person perspective component during active gameplay
+- gameLogic.ts: add `throwToReceiver` function that accepts receiver difficulty + pressure time used and returns a PlayResult
+- The top-down field view is replaced by the QB perspective when a game is active
 
 ### Remove
-- Nothing removed
+- The old "Choose a Play → Select → SNAP" flow is replaced by the new immersive QB view flow
+- Route animation on the top-down map (replaced by perspective view)
 
 ## Implementation Plan
-1. Update `types.ts` with new types and extended `GameState`
-2. Update `gameLogic.ts` with card pack, upgrade cost, and playoff logic
-3. Create `CardPacksPage.tsx` — coin balance display, three pack cards, animated reveal modal
-4. Create `PlayoffPage.tsx` — 4-team bracket SVG/CSS tree, simulate or play each matchup
-5. Update `RosterPage.tsx` — add upgrade button per player, show upgrade cost, deduct coins
-6. Update `App.tsx` — new state fields, new page routing, coin logic on game save, new nav items
-7. Update `SeasonPage.tsx` — show coin total, unlock playoff button
-8. Validate (typecheck + lint + build)
+1. Add `QBFieldView` canvas/SVG component to PlayPage.tsx with perspective projection
+2. Show 3–4 receiver icons on field at perspective-correct positions with coverage status badges
+3. Add pressure timer (PocketTimer) that counts down 3s after snap; if expired, forces throw-away/sack
+4. Add receiver-tap throw mechanic that calls new `throwToReceiver` in gameLogic.ts
+5. For run plays, show left/right arrow lanes on the perspective field instead of receivers
+6. Update `callPlay` / add `throwToReceiver` in gameLogic.ts with pressure + coverage calculations
+7. Keep scoreboard, play history, and game over logic unchanged

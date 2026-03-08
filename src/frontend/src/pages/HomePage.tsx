@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, PlayCircle, Trophy, Zap } from "lucide-react";
+import { TEAM_LOGOS } from "../assets";
 import { AI_TEAMS } from "../gameLogic";
 import type { ScheduledGame, Team } from "../types";
 
@@ -56,13 +57,27 @@ export default function HomePage({
         />
         <div className="relative">
           <div className="flex items-start justify-between">
-            <div>
-              <p className="text-white/70 text-xs font-medium uppercase tracking-widest">
-                {userTeam.city}
-              </p>
-              <h1 className="font-display text-3xl font-black text-white leading-none mt-0.5">
-                {userTeam.name}
-              </h1>
+            <div className="flex items-center gap-3">
+              {/* Team logo */}
+              {userTeam.logoId && TEAM_LOGOS[userTeam.logoId] ? (
+                <img
+                  src={TEAM_LOGOS[userTeam.logoId]}
+                  alt={userTeam.name}
+                  className="w-12 h-12 object-contain drop-shadow-lg shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-12 flex items-center justify-center text-2xl shrink-0">
+                  🏈
+                </div>
+              )}
+              <div>
+                <p className="text-white/70 text-xs font-medium uppercase tracking-widest">
+                  {userTeam.city}
+                </p>
+                <h1 className="font-display text-3xl font-black text-white leading-none mt-0.5">
+                  {userTeam.name}
+                </h1>
+              </div>
             </div>
             <div className="text-right">
               <div className="font-display text-4xl font-black text-white leading-none">
@@ -109,6 +124,15 @@ export default function HomePage({
           <CardContent>
             <div className="flex items-center justify-between mb-4">
               <div className="text-center">
+                {userTeam.logoId && TEAM_LOGOS[userTeam.logoId] ? (
+                  <img
+                    src={TEAM_LOGOS[userTeam.logoId]}
+                    alt={userTeam.abbreviation}
+                    className="w-10 h-10 mx-auto object-contain mb-1"
+                  />
+                ) : (
+                  <div className="text-2xl mb-1">🏈</div>
+                )}
                 <div className="font-display text-2xl font-black text-primary">
                   {userTeam.abbreviation}
                 </div>
@@ -120,6 +144,15 @@ export default function HomePage({
                 VS
               </div>
               <div className="text-center">
+                {opponent.logoId && TEAM_LOGOS[opponent.logoId] ? (
+                  <img
+                    src={TEAM_LOGOS[opponent.logoId]}
+                    alt={opponent.abbreviation}
+                    className="w-10 h-10 mx-auto object-contain mb-1"
+                  />
+                ) : (
+                  <div className="text-2xl mb-1">🏈</div>
+                )}
                 <div
                   className="font-display text-2xl font-black"
                   style={{ color: opponent.primaryColor }}
@@ -196,6 +229,13 @@ export default function HomePage({
                     >
                       {won ? "W" : "L"}
                     </Badge>
+                    {opp?.logoId && TEAM_LOGOS[opp.logoId] && (
+                      <img
+                        src={TEAM_LOGOS[opp.logoId]}
+                        alt={opp.abbreviation}
+                        className="w-5 h-5 object-contain"
+                      />
+                    )}
                     <span className="text-sm text-foreground/80">
                       Week {game.week} vs {opp?.abbreviation ?? "???"}
                     </span>
